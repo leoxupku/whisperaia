@@ -43,11 +43,13 @@ class PersonalVocabulary:
         """)
         self._conn.commit()
 
-    def record(self, original: str, corrected: str):
+    def record(self, original: str, corrected: str) -> list[tuple[str, str]]:
         self._upsert("corrections", original, corrected)
-        for orig_word, corr_word in _extract_word_pairs(original, corrected):
+        pairs = _extract_word_pairs(original, corrected)
+        for orig_word, corr_word in pairs:
             self._upsert("word_corrections", orig_word, corr_word)
         self._conn.commit()
+        return pairs
 
     def apply_substitutions(self, text: str) -> str:
         """Directly replace known bad patterns before LLM sees the text."""

@@ -11,7 +11,7 @@ from .postprocess import OllamaPostProcessor
 from .transcribe import WhisperTranscriber
 from .vocabulary import PersonalVocabulary
 
-CORRECTION_WINDOW = 30  # seconds
+CORRECTION_WINDOW = 180  # seconds
 
 
 class WhisperAIA:
@@ -101,7 +101,7 @@ class WhisperAIA:
         if not self._last_raw:
             return
         if time.time() - self._last_ts > CORRECTION_WINDOW:
-            self._window.set_state(AppState.IDLE, message="距上次转写超30秒，请重新说话后纠错")
+            self._window.set_state(AppState.IDLE, message="距上次转写超3分钟，请重新说话后纠错")
             return
         user_correction = pyperclip.paste().strip()
         if not user_correction:
@@ -110,11 +110,16 @@ class WhisperAIA:
         if user_correction == self._last_raw:
             self._window.set_state(AppState.IDLE, message="内容与原始转写相同，无需记录")
             return
-        self._vocab.record(self._last_raw, user_correction)
+        pairs = self._vocab.record(self._last_raw, user_correction)
+        if pairs:
+            dict_info = "词典: " + "  ".join(f'"{o}"→"{c}"' for o, c in pairs)
+        else:
+            dict_info = "词典: 已记录整句对应（未提取子词）"
         self._window.set_state(
             AppState.IDLE,
             message="✅ 纠错已记录",
             raw=self._last_raw,
             corrected=user_correction,
+            timing=dict_info,
         )
         self._last_raw = ""
