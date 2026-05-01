@@ -15,14 +15,12 @@ MLX_MODEL = "mlx-community/whisper-large-v3-mlx"
 
 class WhisperTranscriber:
     def __init__(self):
-        print(f"加载 Whisper 模型（首次运行会下载，约 1.5GB）...")
-        # warm up: triggers model download + Metal compilation
+        # Warm up: triggers model download + Metal compilation
         mlx_whisper.transcribe(
             np.zeros(SAMPLE_RATE, dtype=np.float32),
             path_or_hf_repo=MLX_MODEL,
             language="zh",
         )
-        print("Whisper 模型加载完成")
 
     def transcribe(self, audio: np.ndarray) -> str:
         if len(audio) < SAMPLE_RATE * 0.3:

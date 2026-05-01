@@ -47,7 +47,6 @@ class PersonalVocabulary:
         self._upsert("corrections", original, corrected)
         for orig_word, corr_word in _extract_word_pairs(original, corrected):
             self._upsert("word_corrections", orig_word, corr_word)
-            print(f"  [词典] {orig_word!r} → {corr_word!r}")
         self._conn.commit()
 
     def apply_substitutions(self, text: str) -> str:

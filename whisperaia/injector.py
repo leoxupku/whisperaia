@@ -1,14 +1,16 @@
 import time
 import pyperclip
-from pynput.keyboard import Controller, Key
+import Quartz
+
+_kVK_ANSI_V = 9  # macOS virtual key code for 'V'
 
 
 class TextInjector:
-    def __init__(self):
-        self._keyboard = Controller()
-
     def inject(self, text: str):
         pyperclip.copy(text)
         time.sleep(0.08)  # let clipboard settle
-        with self._keyboard.pressed(Key.cmd):
-            self._keyboard.tap("v")
+        src = Quartz.CGEventSourceCreate(Quartz.kCGEventSourceStateHIDSystemState)
+        for key_down in (True, False):
+            ev = Quartz.CGEventCreateKeyboardEvent(src, _kVK_ANSI_V, key_down)
+            Quartz.CGEventSetFlags(ev, Quartz.kCGEventFlagMaskCommand)
+            Quartz.CGEventPost(Quartz.kCGHIDEventTap, ev)

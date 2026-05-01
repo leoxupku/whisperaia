@@ -38,6 +38,5 @@ class OllamaPostProcessor:
             if len(result) > len(text) * 2:
                 return text
             return result
-        except Exception as e:
-            print(f"[后处理失败，使用原始结果] {e}")
+        except Exception:
             return text
